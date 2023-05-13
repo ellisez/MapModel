@@ -2,11 +2,11 @@ name: map_model
 
 description: MapModel as its name suggests. Implement various Model objects using Map, such as Entity, VO, and DTO.
 
-publish_to: 'https://github.com/ellisez/MapModel'
+homepage: 'https://github.com/ellisez/MapModel'
 
-version: 1.0.0+1
+version: 1.0.0
 
 environment:
-  sdk: '>=2.19.6 <3.0.0'
+  sdk: '>=2.19.6 <4.0.0'
 
 
