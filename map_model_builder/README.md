@@ -1,6 +1,6 @@
 # MapModel
 
-`Dart` `flutter` [Pub Package](https://pub.dev/packages/MapAsModel)
+`Dart` `flutter` [Pub Package](https://pub.dev/packages/map_model)
 
 MapModel as its name suggests. Implement various Model objects using Map, such as Entity, VO, and DTO.
 
