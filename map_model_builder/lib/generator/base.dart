@@ -4,7 +4,8 @@ import 'package:build/src/builder/build_step.dart';
 import 'package:map_model/annotation.dart';
 import 'package:source_gen/source_gen.dart';
 
-class MapModelGenerator extends GeneratorForAnnotation<Model> {
+abstract class BaseGenerator<T> extends GeneratorForAnnotation<T> {
+  String get mapClass;
 
   @override
   generateForAnnotatedElement(Element element, ConstantReader annotation,
@@ -88,11 +89,11 @@ $initString
       return '''part of '$partOf';
 
 class _${className}Impl {
-  final Map<String, dynamic> _data;
+  final $mapClass _data;
 
 ${propertyString}
 
-  _${className}Impl([Map<String, dynamic>? data]) : _data = data ?? {} ${initString.isNotEmpty? initString: ';'}
+  _${className}Impl([$mapClass? data]) : _data = data ?? {} ${initString.isNotEmpty? initString: ';'}
 }
 ''';
     }
