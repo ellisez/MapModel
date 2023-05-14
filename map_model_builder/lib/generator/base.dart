@@ -1,7 +1,6 @@
 import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/dart/element/type.dart';
 import 'package:build/src/builder/build_step.dart';
-import 'package:map_model/annotation.dart';
 import 'package:source_gen/source_gen.dart';
 
 abstract class BaseGenerator<T> extends GeneratorForAnnotation<T> {
