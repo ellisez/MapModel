@@ -4,9 +4,10 @@ import 'package:build/src/builder/build_step.dart';
 import 'package:source_gen/source_gen.dart';
 
 abstract class BaseGenerator<T> extends GeneratorForAnnotation<T> {
-  String get mapClass;
+  String get mapClass => 'Map<String, dynamic>';
   String get customCode => '';
   String get superClass => '';
+  String get initCode => '';
 
   @override
   generateForAnnotatedElement(Element element, ConstantReader annotation,
@@ -78,20 +79,19 @@ abstract class BaseGenerator<T> extends GeneratorForAnnotation<T> {
 ''';
         }
 
-        if (initString.isNotEmpty) {
+        if (initString.isNotEmpty || initCode.isNotEmpty) {
           initString = ''' {
+$initCode
 $initString
 }
 ''';
         }
       }
 
-      var setData = 'data ?? {}';
-      if (mapClass != 'Map<String, dynamic>' &&
-          mapClass != 'Map<dynamic, dynamic>' && mapClass != 'Map') {
-        setData = '$mapClass($setData)';
+      var newFromMap = 'data ?? {}';
+      if (mapClass != 'Map' && mapClass != 'Map<dynamic, dynamic>' && mapClass != 'Map<String, dynamic>') {
+        newFromMap = '$mapClass($newFromMap)';
       }
-
       return '''
 
 class _${className}Impl $superClass {
@@ -100,7 +100,9 @@ class _${className}Impl $superClass {
 ${propertyString}
 $customCode
 
-  _${className}Impl([Map<String, dynamic>? data]) : _data = $setData ${initString.isNotEmpty? initString: ';'}
+  _${className}Impl([Map<String, dynamic>? data]) : this._($newFromMap);
+
+  _${className}Impl._($mapClass data) : _data = data ${superClass.isNotEmpty?', super(data)':''} ${initString.isNotEmpty? initString: ';'}
 }
 ''';
     }

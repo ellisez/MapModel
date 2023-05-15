@@ -1,6 +1,6 @@
 builders:
   map_model_builder:
-    import: 'package:map_model_builder/builder.dart'
+    import: 'package:map_model_builder/main.dart'
     builder_factories: ['mapModelBuilder']
     build_extensions: { ".dart": [ "model_model.g.part" ] }
     auto_apply: all_packages

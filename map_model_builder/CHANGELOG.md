@@ -10,3 +10,9 @@
 
 ## 1.0.5
 - Support custom super class.
+
+## 1.0.6
+- Support custom init code.
+
+## 1.0.7
+- Support empty construction.
