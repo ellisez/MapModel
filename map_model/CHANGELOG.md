@@ -7,3 +7,4 @@
 
 ## 1.0.4
 - Support custom code.
+- Support empty construction.
