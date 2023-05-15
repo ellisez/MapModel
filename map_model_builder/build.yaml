@@ -2,6 +2,7 @@ builders:
   map_model_builder:
     import: 'package:map_model_builder/builder.dart'
     builder_factories: ['mapModelBuilder']
-    build_extensions: { ".dart": [ ".g.part" ] }
-    auto_apply: root_package
-    build_to: source
+    build_extensions: { ".dart": [ "model_model.g.part" ] }
+    auto_apply: all_packages
+    build_to: cache
+    applies_builders: ["source_gen|combining_builder"]

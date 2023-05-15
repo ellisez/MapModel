@@ -5,4 +5,4 @@ import 'package:map_model_builder/generator/map_model.dart';
 import 'package:source_gen/source_gen.dart';
 
 Builder mapModelBuilder(BuilderOptions options) =>
-    LibraryBuilder(MapModelGenerator());
+    SharedPartBuilder([MapModelGenerator()], 'map_model');

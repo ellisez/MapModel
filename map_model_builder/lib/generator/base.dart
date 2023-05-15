@@ -11,7 +11,6 @@ abstract class BaseGenerator<T> extends GeneratorForAnnotation<T> {
       BuildStep buildStep) {
     if (element is ClassElement) {
       var className = element.name;
-      var partOf = buildStep.inputId.pathSegments.last;
 
       /// property list
       String propertyString = '';
@@ -85,14 +84,20 @@ $initString
         }
       }
 
-      return '''part of '$partOf';
+      var setData = 'data ?? {}';
+      if (mapClass != 'Map<String, dynamic>' &&
+          mapClass != 'Map<dynamic, dynamic>' && mapClass != 'Map') {
+        setData = '$mapClass($setData)';
+      }
+
+      return '''
 
 class _${className}Impl {
   final $mapClass _data;
 
 ${propertyString}
 
-  _${className}Impl([$mapClass? data]) : _data = data ?? {} ${initString.isNotEmpty? initString: ';'}
+  _${className}Impl([Map<String, dynamic>? data]) : _data = $setData ${initString.isNotEmpty? initString: ';'}
 }
 ''';
     }
