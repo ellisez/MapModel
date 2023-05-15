@@ -6,6 +6,7 @@ import 'package:source_gen/source_gen.dart';
 abstract class BaseGenerator<T> extends GeneratorForAnnotation<T> {
   String get mapClass;
   String get customCode => '';
+  String get superClass => '';
 
   @override
   generateForAnnotatedElement(Element element, ConstantReader annotation,
@@ -93,7 +94,7 @@ $initString
 
       return '''
 
-class _${className}Impl {
+class _${className}Impl $superClass {
   final $mapClass _data;
 
 ${propertyString}
