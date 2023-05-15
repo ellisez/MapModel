@@ -16,3 +16,6 @@
 
 ## 1.0.7
 - Support empty construction.
+
+## 1.0.8
+- Update annotation depends.

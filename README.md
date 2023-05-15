@@ -36,7 +36,7 @@ part 'your_model.g.dart';
   Property<Map?>('mapNoType'),
 ])
 class YourModel extends _YourModelImpl {
-
+  YourModel([super.data]);
 }
 
 /// custom convert
