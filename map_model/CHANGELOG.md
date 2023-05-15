@@ -4,3 +4,6 @@
 
 ## 1.0.3
 - Support custom Map type.
+
+## 1.0.4
+- Support custom code.
