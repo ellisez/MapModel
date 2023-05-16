@@ -19,3 +19,6 @@
 
 ## 1.0.8
 - Update annotation depends.
+
+## 1.0.9
+- Update library entry name.
