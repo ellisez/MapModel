@@ -22,3 +22,6 @@
 
 ## 1.0.9
 - Update library entry name.
+
+## 1.0.10
+- add useDefault().

@@ -80,7 +80,7 @@ abstract class BaseGenerator<T> extends GeneratorForAnnotation<T> {
         }
 
         if (initString.isNotEmpty || initCode.isNotEmpty) {
-          initString = ''' {
+          initString = '''void useDefault() {
 $initCode
 $initString
 }
@@ -99,10 +99,11 @@ class _${className}Impl $superClass {
 
 ${propertyString}
 $customCode
+$initString
 
   _${className}Impl([Map<String, dynamic>? data]) : this._($newFromMap);
 
-  _${className}Impl._($mapClass data) : _data = data ${superClass.isNotEmpty?', super(data)':''} ${initString.isNotEmpty? initString: ';'}
+  _${className}Impl._($mapClass data) : _data = data ${superClass.isNotEmpty?', super(data)':''} ${initString.isNotEmpty? '{useDefault();}': ';'}
 }
 ''';
     }
