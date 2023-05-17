@@ -2,6 +2,8 @@
 
 `Dart` `flutter` [Pub Package](https://pub.dev/packages/map_model)
 
+Language: [en](README.md) [cn](README-ZH_CN.md)
+
 MapModel as its name suggests. Implement various Model objects using Map, such as Entity, VO, and DTO.
 
 Its core idea is to use Map as storage and getter/setter as facade to control visibility.

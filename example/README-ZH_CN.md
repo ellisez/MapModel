@@ -4,12 +4,12 @@
 
 Language: [en](README.md) [cn](README-ZH_CN.md)
 
-MapModel as its name suggests. Implement various Model objects using Map, such as Entity, VO, and DTO.
+MapModel顾名思义就是，使用Map实现各种Model对象，如Entity、VO和DTO。
 
-Its core idea is to use Map as storage and getter/setter as facade to control visibility.
-In order to reduce the cost of object conversion, and even share the same instance, only with different visibility.
-This is like using different types of pointers to interpret the same memory space, rather than maintaining data synchronization across multiple memory blocks.
+它的核心思想是使用Map作为存储，使用getter/setter作为门面来控制可见性。
+为了降低对象转换的成本，甚至可以使用共享同一实例，只需要控制字段可见性即可。
 
+这就像使用不同类型的指针来解释相同的内存空间，而不是在多个内存块之间保持数据同步，既开辟了大量内存空间，又浪费算力重复拷贝数据。
 ## Setup
 
 ```yaml
