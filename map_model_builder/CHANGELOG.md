@@ -25,3 +25,6 @@
 
 ## 1.0.10
 - add useDefault().
+
+## 1.0.11
+- use mixin.

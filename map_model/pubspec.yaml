@@ -4,9 +4,12 @@ description: MapModel as its name suggests. Implement various Model objects usin
 
 homepage: 'https://github.com/ellisez/MapModel'
 
-version: 1.0.5
+version: 1.0.6
 
 environment:
   sdk: '>=2.19.6 <4.0.0'
+
+dependencies:
+  meta: ^1.9.1
 
 

@@ -5,19 +5,32 @@ import 'package:source_gen/source_gen.dart';
 
 abstract class BaseGenerator<T> extends GeneratorForAnnotation<T> {
   String get mapClass => 'Map<String, dynamic>';
+
   String get customCode => '';
-  String get superClass => '';
+
+  String get superClass => 'MapModel';
+
   String get initCode => '';
 
+  String get modelRef => '\$_data';
+
   @override
-  generateForAnnotatedElement(Element element, ConstantReader annotation,
-      BuildStep buildStep) {
+  generateForAnnotatedElement(
+      Element element, ConstantReader annotation, BuildStep buildStep) {
     if (element is ClassElement) {
       var className = element.name;
+      var genMixin = '_${className}Mixin';
+
+      String genClass = '';
+      var superType = element.supertype;
+      if (superType == null || superType.element.name == 'Object') {
+        genClass = '_${className}Impl';
+      }
 
       /// property list
       String propertyString = '';
       String initString = '';
+      String exportString = '';
       var properties = annotation.read('properties');
       if (!properties.isNull) {
         for (var item in properties.listValue) {
@@ -34,11 +47,11 @@ abstract class BaseGenerator<T> extends GeneratorForAnnotation<T> {
 
           /// property name
           var propertyName = item.getField('name')!.toStringValue();
-          var propertyValue = "_data['$propertyName']";
+          var propertyValue = "$modelRef['$propertyName']";
           var setValue = propertyValue;
 
           /// property default
-          var defaultValue = item.getField('value');//?.variable?.displayName;
+          var defaultValue = item.getField('value'); //?.variable?.displayName;
           if (defaultValue != null && !defaultValue.isNull) {
             initString += '''
   if ($propertyValue == null) {
@@ -54,8 +67,7 @@ abstract class BaseGenerator<T> extends GeneratorForAnnotation<T> {
             if (listEleType is! DynamicType) {
               setValue = '$setValue?.cast<$listEleType>()';
             }
-          } else
-          if (propertyTypeObject.isDartCoreMap) {
+          } else if (propertyTypeObject.isDartCoreMap) {
             /// castMap
             propertyTypeObject as ParameterizedType;
             var keyType = propertyTypeObject.typeArguments.first;
@@ -77,33 +89,38 @@ abstract class BaseGenerator<T> extends GeneratorForAnnotation<T> {
   set $propertyName($propertyType $propertyName) => $propertyValue = $propertyName;
 
 ''';
+          exportString += "map['$propertyName'] = $propertyValue;";
         }
 
-        if (initString.isNotEmpty || initCode.isNotEmpty) {
-          initString = '''void useDefault() {
-$initCode
-$initString
+      }
+
+      if (genClass.isNotEmpty) {
+        genClass = '''
+class $genClass extends $superClass with $genMixin {
+  $genClass([super.data]);
 }
 ''';
-        }
-      }
-
-      var newFromMap = 'data ?? {}';
-      if (mapClass != 'Map' && mapClass != 'Map<dynamic, dynamic>' && mapClass != 'Map<String, dynamic>') {
-        newFromMap = '$mapClass($newFromMap)';
       }
       return '''
-
-class _${className}Impl $superClass {
-  final $mapClass _data;
+$genClass
+mixin $genMixin on $superClass {
 
 ${propertyString}
 $customCode
-$initString
 
-  _${className}Impl([Map<String, dynamic>? data]) : this._($newFromMap);
 
-  _${className}Impl._($mapClass data) : _data = data ${superClass.isNotEmpty?', super(data)':''} ${initString.isNotEmpty? '{useDefault();}': ';'}
+  @override
+  void useDefault() {
+    $initCode
+    $initString
+  }
+
+  @override
+  Map<String, dynamic> export() {
+    var map = super.export();
+    $exportString
+    return map;
+  }
 }
 ''';
     }

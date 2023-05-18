@@ -1,3 +1,4 @@
 library map_model;
 
-export 'annotation.dart';
+export 'annotation/model.dart';
+export 'src/map_model.dart';

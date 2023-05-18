@@ -11,3 +11,6 @@
 
 ## 1.0.5
 - Update library entry name.
+
+## 1.0.6
+- use mixin.
