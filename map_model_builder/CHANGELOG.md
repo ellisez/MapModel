@@ -35,3 +35,6 @@
 ## 1.0.13
 - Add default type convert.
 - Add custom type convert.
+
+## 1.0.14
+- fix bug convert null.

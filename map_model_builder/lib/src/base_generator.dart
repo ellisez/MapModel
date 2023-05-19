@@ -29,10 +29,16 @@ abstract class BaseGenerator<T> extends GeneratorForAnnotation<T> {
       }
 
       ///
-      var converts = annotation.read('converts').mapValue.map((key, value) {
-        return MapEntry<String, String>(
-            key!.toTypeValue().toString(), value!.toStringValue()!);
-      });
+      var annConverts = annotation.peek('converts');
+      var converts = <String, String>{};
+      if (annConverts != null) {
+        var mapValues = annConverts.mapValue;
+        for (var entry in mapValues.entries) {
+          var key = entry.key;
+          var value = entry.value;
+          converts[key!.toTypeValue().toString()] = value!.toStringValue()!;
+        }
+      }
 
       /// property list
       String propertyString = '';
