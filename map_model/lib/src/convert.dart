@@ -1,3 +1,4 @@
+/// defaultIntConvert
 int defaultIntConvert(String _, dynamic value) {
   if (value is int) {
   } else if (value is String) {
@@ -6,6 +7,7 @@ int defaultIntConvert(String _, dynamic value) {
   return value;
 }
 
+/// defaultDoubleConvert
 double defaultDoubleConvert(String _, dynamic value) {
   if (value is double) {
   } else if (value is String) {
@@ -14,6 +16,7 @@ double defaultDoubleConvert(String _, dynamic value) {
   return value;
 }
 
+/// defaultStringConvert
 String defaultStringConvert(String _, dynamic value) {
   if (value is String) {
   } else {
@@ -22,6 +25,7 @@ String defaultStringConvert(String _, dynamic value) {
   return value;
 }
 
+/// dateTimeConvertBuilder
 DateTime Function(String, dynamic) dateTimeConvertBuilder() {
   return (String property, dynamic value) {
     if (value is String) {
@@ -33,6 +37,7 @@ DateTime Function(String, dynamic) dateTimeConvertBuilder() {
   };
 }
 
+/// stringListConvertBuilder
 List<String> Function(String, dynamic) stringListConvertBuilder(
         [String sep = ' ']) =>
     (_, dynamic value) => value.split(sep);
