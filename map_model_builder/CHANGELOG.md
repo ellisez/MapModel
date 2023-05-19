@@ -38,3 +38,6 @@
 
 ## 1.0.14
 - fix bug convert null.
+
+## 1.0.15
+- fix bug call super validate.

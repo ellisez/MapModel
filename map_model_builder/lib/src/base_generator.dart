@@ -149,12 +149,14 @@ $customCode
 
   @override
   void \$default() {
+    super.\$default();
     $initCode
     $initString
   }
   
   @override
   void \$validate() {
+    super.\$validate();
     $validateString
   }
   
