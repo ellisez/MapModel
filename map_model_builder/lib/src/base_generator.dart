@@ -31,6 +31,7 @@ abstract class BaseGenerator<T> extends GeneratorForAnnotation<T> {
       String propertyString = '';
       String initString = '';
       String exportString = '';
+      String validateString = '';
       var properties = annotation.read('properties');
       if (!properties.isNull) {
         for (var item in properties.listValue) {
@@ -48,7 +49,6 @@ abstract class BaseGenerator<T> extends GeneratorForAnnotation<T> {
           /// property name
           var propertyName = item.getField('name')!.toStringValue();
           var propertyValue = "$modelRef['$propertyName']";
-          var setValue = propertyValue;
 
           /// property default
           var defaultValue = item.getField('value'); //?.variable?.displayName;
@@ -60,6 +60,15 @@ abstract class BaseGenerator<T> extends GeneratorForAnnotation<T> {
 ''';
           }
 
+          if (propertyTypeObject is! DynamicType) {
+            validateString += '''
+if ($propertyValue != null) {
+  assert($propertyValue is $propertyType, '$propertyName is not $propertyType');
+}
+          ''';
+          }
+
+          var setValue = propertyValue;
           if (propertyTypeObject.isDartCoreList) {
             /// castList
             propertyTypeObject as ParameterizedType;
@@ -75,12 +84,6 @@ abstract class BaseGenerator<T> extends GeneratorForAnnotation<T> {
             if (keyType is! DynamicType || valueType is! DynamicType) {
               setValue = '$setValue?.cast<$keyType, $valueType>()';
             }
-          }
-
-          /// convert
-          var convert = item.getField('convert')?.toStringValue();
-          if (convert != null) {
-            setValue = '$convert($setValue)';
           }
 
           propertyString += '''
@@ -114,6 +117,11 @@ $customCode
     $initCode
     $initString
   }
+  
+  @override
+  void validate() {
+    $validateString
+  }
 
   @override
   Map<String, dynamic> export() {
@@ -124,5 +132,14 @@ $customCode
 }
 ''';
     }
+  }
+
+  String? getConvert(DartType type) {
+    type.isDartCoreMap;
+    type.isDartCoreList;
+    type.isDartCoreInt;
+    type.isDartCoreDouble;
+    type.isDartCoreSet;
+    return null;
   }
 }

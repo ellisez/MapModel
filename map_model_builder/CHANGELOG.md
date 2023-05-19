@@ -28,3 +28,6 @@
 
 ## 1.0.11
 - use mixin.
+
+## 1.0.12
+- No longer providing convert, but verifying the type.

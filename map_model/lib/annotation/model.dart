@@ -7,8 +7,7 @@ class Model {
 class Property<T> {
   final String name;
   final String? value;
-  final String? convert;
 
-  const Property(this.name, {this.value, this.convert});
+  const Property(this.name, {this.value});
 
 }
