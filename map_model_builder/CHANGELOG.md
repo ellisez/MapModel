@@ -41,3 +41,6 @@
 
 ## 1.0.15
 - fix bug call super validate.
+
+## 1.0.16
+- update comments.
