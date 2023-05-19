@@ -1,4 +1,5 @@
 import 'package:analyzer/dart/element/element.dart';
+import 'package:analyzer/dart/element/nullability_suffix.dart';
 import 'package:analyzer/dart/element/type.dart';
 import 'package:build/src/builder/build_step.dart';
 import 'package:source_gen/source_gen.dart';
@@ -12,7 +13,7 @@ abstract class BaseGenerator<T> extends GeneratorForAnnotation<T> {
 
   String get initCode => '';
 
-  String get modelRef => '\$_data';
+  String get modelRef => '\$data';
 
   @override
   generateForAnnotatedElement(
@@ -27,13 +28,20 @@ abstract class BaseGenerator<T> extends GeneratorForAnnotation<T> {
         genClass = '_${className}Impl';
       }
 
+      ///
+      var converts = annotation.read('converts').mapValue.map((key, value) {
+        return MapEntry<String, String>(
+            key!.toTypeValue().toString(), value!.toStringValue()!);
+      });
+
       /// property list
       String propertyString = '';
       String initString = '';
       String exportString = '';
       String validateString = '';
-      var properties = annotation.read('properties');
-      if (!properties.isNull) {
+      String typesString = '';
+      var properties = annotation.peek('properties');
+      if (properties != null) {
         for (var item in properties.listValue) {
           /// property type
           late DartType propertyTypeObject;
@@ -51,21 +59,13 @@ abstract class BaseGenerator<T> extends GeneratorForAnnotation<T> {
           var propertyValue = "$modelRef['$propertyName']";
 
           /// property default
-          var defaultValue = item.getField('value'); //?.variable?.displayName;
+          var defaultValue = item.getField('value');
           if (defaultValue != null && !defaultValue.isNull) {
             initString += '''
   if ($propertyValue == null) {
     $propertyValue = ${defaultValue.toStringValue()};
   }
 ''';
-          }
-
-          if (propertyTypeObject is! DynamicType) {
-            validateString += '''
-if ($propertyValue != null) {
-  assert($propertyValue is $propertyType, '$propertyName is not $propertyType');
-}
-          ''';
           }
 
           var setValue = propertyValue;
@@ -86,6 +86,36 @@ if ($propertyValue != null) {
             }
           }
 
+          var typeElement = propertyType;
+          if (propertyTypeObject.nullabilitySuffix != NullabilitySuffix.none) {
+            typeElement = typeElement.substring(0, typeElement.length - 1);
+          }
+
+          /// types
+          typesString += '''
+          map['$propertyName'] = $typeElement;
+          ''';
+
+          /// validate
+          if (propertyTypeObject is! DynamicType) {
+            var convert = converts[typeElement] ?? defaultConvert[typeElement];
+            if (convert != null) {
+              validateString += '''
+              var $propertyName = $propertyValue;
+              if ($propertyName != null) {
+                $propertyValue = $convert('$propertyName', $propertyName);
+              }
+              ''';
+            } else {
+              validateString += '''
+              var $propertyName = $propertyValue;
+              if ($propertyName != null) {
+                assert($propertyName is $propertyType, '$propertyName is not $propertyType');
+              }
+              ''';
+            }
+          }
+
           propertyString += '''
   $propertyType get $propertyName => $setValue;
 
@@ -94,7 +124,6 @@ if ($propertyValue != null) {
 ''';
           exportString += "map['$propertyName'] = $propertyValue;";
         }
-
       }
 
       if (genClass.isNotEmpty) {
@@ -113,33 +142,40 @@ $customCode
 
 
   @override
-  void useDefault() {
+  void \$default() {
     $initCode
     $initString
   }
   
   @override
-  void validate() {
+  void \$validate() {
     $validateString
+  }
+  
+  @override
+  Map<String, Type> \$types() {
+    var map = super.\$types();
+    $typesString
+    return map;
   }
 
   @override
-  Map<String, dynamic> export() {
-    var map = super.export();
+  Map<String, dynamic> \$export() {
+    var map = super.\$export();
     $exportString
     return map;
   }
 }
-''';
+
+    ''';
     }
   }
-
-  String? getConvert(DartType type) {
-    type.isDartCoreMap;
-    type.isDartCoreList;
-    type.isDartCoreInt;
-    type.isDartCoreDouble;
-    type.isDartCoreSet;
-    return null;
-  }
 }
+
+Map<String, String> defaultConvert = {
+  'int': 'defaultIntConvert',
+  'double': 'defaultDoubleConvert',
+  'String': 'defaultStringConvert',
+  'List<String>': 'stringListConvertBuilder()',
+  'DateTime': 'dateTimeConvertBuilder()',
+};

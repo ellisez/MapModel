@@ -25,31 +25,42 @@ dev_dependencies:
 
 ```dart
 import 'package:map_model/map_model.dart';
+
 part 'your_model.g.dart';
 
 @Model([
   Property<String?>('nullableString', value: '"123"'),
   Property<int>('fixInt'),
   Property('notType', value: '12'),
-  Property<List<String?>?>('listWithType'),
+  Property<List<String>?>('listWithType'),
   Property<List?>('listNoType'),
   Property<Map<String?, dynamic>?>('mapWithType'),
   Property<Map?>('mapNoType'),
-])
-class SuperModel extends _SuperModelImpl {/// use extends
+  Property<DateTime?>('dateTime'),
+], converts: {
+  List<String?>: 'toStringList',
+})
+class SuperModel extends _SuperModelImpl {
+  /// use extends
   SuperModel([super.data]);
 }
 
 @Model([
   Property<String?>('subProperty', value: '"value form sub default"'),
 ])
-class SubModel extends SuperModel with _SubModelMixin {/// use mixin
+class SubModel extends SuperModel with _SubModelMixin {
+  /// use mixin
   SubModel([super.data]);
+}
+
+List<String> toStringList(String property, dynamic value) {
+  return value.split(' ');
 }
 
 
 ```
 
+- `@Model.converts` define the convert of Type, see Default Support Type: List<String>, int, double, DateTime
 - use extends superClass: _${yourClass}Impl
 - use mixin: _${yourClass}Mixin
 
@@ -67,35 +78,42 @@ dart run build_runner build
 ## Use MapModel
 
 ```dart
-import 'your_model.dart';
+/// simple case
+var customModel = SuperModel();
+print(customModel.nullableString);
 
-main() {
-  /// simple case
-  var customModel = SuperModel();
-  print(customModel.nullableString);
-  /// console see 123
+/// console see '123'
 
-  /// init data
-  Map<String, dynamic> data = {'nullableString': 'notDefaultValue', 'unknownProperty': 'do not export'};
-  var customModelWithInit = SuperModel(data);
-  print(customModelWithInit.nullableString);
-  /// console see notDefaultValue
+/// init data
+Map<String, dynamic> data = {
+  'nullableString': 'notDefaultValue',
+  'unknownProperty': 'do not export',
+  'listWithType': 'a b c', // auto convert, List<String> default sep is ' '
+  'dateTime': '2023-05-19' // auto convert, DateTime accept String & int
+};
+var customModelWithInit = SuperModel(data);
+print(customModelWithInit.nullableString);
 
-  var subModel = SubModel(data);
-  print(subModel.export());
-  /// do not export 'unknownProperty'
-  /// console see {nullableString: notDefaultValue, fixInt: null, withValueConvert: 12, listWithType: null, listNoType: null, mapWithType: null, mapNoType: null, subProperty: value form sub default}
+/// console see 'notDefaultValue'
 
-  var other = SuperModel();
-  subModel.bindTo(other);/// Different types have obtained the ability to synchronize data
-  /// change one of binds, other also changed
-  subModel.nullableString = 'from bind changed';
+var subModel = SubModel(data);
+print(subModel.$export());
 
-  print(other.nullableString);
-  /// console see 'from bind changed'
-}
+/// do not export 'unknownProperty'
+/// console see {nullableString: notDefaultValue, fixInt: null, notType: 12, listWithType: [a, b, c], listNoType: null, mapWithType: null, mapNoType: null, dateTime: 2023-05-19 00:00:00.000, subProperty: value form sub default}
+var other = SuperModel();
+subModel.$bindTo(other);
+
+/// Different types have obtained the ability to synchronize data
+/// change one of binds, other also changed
+subModel.nullableString = 'from bind changed';
+
+print(other.nullableString);
+
+/// console see 'from bind changed'
 
 ```
 
-- `export()` Only defined fields can be obtained.
-- `bindTo()` Used for conversion between models, sharing a single piece of data.
+- `$types` Show all field Types.
+- `$export()` Only defined fields can be obtained.
+- `$bindTo()` Used for conversion between models, sharing a single piece of data.

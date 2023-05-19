@@ -31,3 +31,7 @@
 
 ## 1.0.12
 - No longer providing convert, but verifying the type.
+
+## 1.0.13
+- Add default type convert.
+- Add custom type convert.

@@ -1,7 +1,8 @@
 class Model {
+  final Map<Type, String> converts;
   final List<Property> properties;
 
-  const Model([this.properties = const []]);
+  const Model(this.properties, {this.converts  = const {}});
 }
 
 class Property<T> {
