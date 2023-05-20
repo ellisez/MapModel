@@ -36,7 +36,13 @@ abstract class BaseGenerator<T> extends GeneratorForAnnotation<T> {
         for (var entry in mapValues.entries) {
           var key = entry.key;
           var value = entry.value;
-          converts[key!.toTypeValue().toString()] = value!.toStringValue()!;
+
+          var propertyTypeObject = key!.toTypeValue()!;
+          var typeElement = propertyTypeObject.toString();
+          if (propertyTypeObject.nullabilitySuffix != NullabilitySuffix.none) {
+            typeElement = typeElement.substring(0, typeElement.length - 1);
+          }
+          converts[typeElement] = value!.toStringValue()!;
         }
       }
 

@@ -47,3 +47,6 @@
 
 ## 1.0.17
 - optimized empty code.
+
+## 1.0.18
+- fix bug convert type *.
