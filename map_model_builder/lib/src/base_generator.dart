@@ -68,10 +68,10 @@ abstract class BaseGenerator<T> extends GeneratorForAnnotation<T> {
           var defaultValue = item.getField('value');
           if (defaultValue != null && !defaultValue.isNull) {
             initString += '''
-  if ($propertyValue == null) {
-    $propertyValue = ${defaultValue.toStringValue()};
-  }
-''';
+            if ($propertyValue == null) {
+              $propertyValue = ${defaultValue.toStringValue()};
+            }
+            ''';
           }
 
           var setValue = propertyValue;
@@ -132,51 +132,90 @@ abstract class BaseGenerator<T> extends GeneratorForAnnotation<T> {
         }
       }
 
-      if (genClass.isNotEmpty) {
-        genClass = '''
-class $genClass extends $superClass with $genMixin {
-  $genClass([super.data]);
-}
-''';
-      }
       return '''
-$genClass
+${genSupperClass(genClass, genMixin)}
 mixin $genMixin on $superClass {
 
 ${propertyString}
 $customCode
 
 
-  @override
-  void \$default() {
-    super.\$default();
-    $initCode
-    $initString
-  }
+  ${genDefault(initCode, initString)}
   
-  @override
-  void \$validate() {
-    super.\$validate();
-    $validateString
-  }
+  ${genValidate(validateString)}
   
-  @override
-  Map<String, Type> \$types() {
-    var map = super.\$types();
-    $typesString
-    return map;
-  }
+  ${genTypes(typesString)}
 
-  @override
-  Map<String, dynamic> \$export() {
-    var map = super.\$export();
-    $exportString
-    return map;
-  }
+  ${genExport(exportString)}
 }
 
     ''';
     }
+  }
+
+  String genSupperClass(String genClass, String genMixin) {
+    if (genClass.isNotEmpty) {
+      return '''
+      class $genClass extends $superClass with $genMixin {
+        $genClass([super.data]);
+      }
+      ''';
+    }
+    return '';
+  }
+
+  String genExport(String exportString) {
+    if (exportString.isNotEmpty) {
+      return '''
+      @override
+      Map<String, dynamic> \$export() {
+        var map = super.\$export();
+        $exportString
+        return map;
+      }
+      ''';
+    }
+    return '';
+  }
+
+  String genTypes(String typesString) {
+    if (typesString.isNotEmpty) {
+      return '''
+      @override
+      Map<String, Type> \$types() {
+        var map = super.\$types();
+        $typesString
+        return map;
+      }
+      ''';
+    }
+    return '';
+  }
+
+  String genValidate(String validateString) {
+    if (validateString.isNotEmpty) {
+      return '''
+      @override
+      void \$validate() {
+        super.\$validate();
+        $validateString
+      }
+      ''';
+    }
+    return '';
+  }
+
+  String genDefault(String initCode, String initString) {
+    if (initCode.isNotEmpty || initString.isNotEmpty) {
+      return '''
+      @override
+      void \$default() {
+        super.\$default();
+        $initString $initCode
+      }
+      ''';
+    }
+    return '';
   }
 }
 

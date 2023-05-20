@@ -6,11 +6,10 @@ environment:
   sdk: ^3.0.0
 
 dependencies:
-  map_model: ^1.0.8
-
+  map_model: ^1.0.9
 
 dev_dependencies:
   build_runner: ^2.4.4
-  map_model_builder: ^1.0.14
+  map_model_builder: ^1.0.17
   lints: ^2.0.0
   test: ^1.21.0
