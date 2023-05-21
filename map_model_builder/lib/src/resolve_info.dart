@@ -1,5 +1,6 @@
 import 'package:analyzer/dart/element/type.dart';
 
+/// PropertyInfo
 class PropertyInfo {
   String propertyName;
   DartType propertyType;
@@ -11,6 +12,7 @@ class PropertyInfo {
       required this.propertyTypeName});
 }
 
+/// ConvertInfo
 class ConvertInfo {
   DartType type;
   String typeName;

@@ -6,25 +6,30 @@ import 'package:source_gen/source_gen.dart';
 
 import 'resolve_info.dart';
 
+/// BaseGenerator
 abstract class BaseGenerator<T> extends GeneratorForAnnotation<T> {
+  /// mapClass
   String get mapClass => 'Map<String, dynamic>';
 
+  /// customCode
   String get customCode => '';
 
+  /// superClass
   String get superClass => 'MapModel';
 
+  /// initCode
   String get initCode => '';
 
+  /// modelRef
   String get modelRef => '\$data';
-
-  Set<PropertyInfo> propertySet = {};
-
-  Set<ConvertInfo> convertSet = {};
 
   @override
   generateForAnnotatedElement(
       Element element, ConstantReader annotation, BuildStep buildStep) {
     if (element is ClassElement) {
+      Set<PropertyInfo> propertySet = {};
+      Set<ConvertInfo> convertSet = {};
+
       var className = element.name;
       var genMixin = '_${className}Mixin';
 
@@ -156,27 +161,29 @@ abstract class BaseGenerator<T> extends GeneratorForAnnotation<T> {
       }
 
       return '''
-${genSupperClass(genClass, genMixin)}
+${genSupperClass(genClass, genMixin, propertySet, convertSet)}
 mixin $genMixin on $superClass {
 
 ${propertyString}
 $customCode
 
 
-  ${genDefault(initCode, initString)}
+  ${genDefault(initCode, initString, propertySet, convertSet)}
   
-  ${genValidate(validateString)}
+  ${genValidate(validateString, propertySet, convertSet)}
   
-  ${genTypes(typesString)}
+  ${genTypes(typesString, propertySet, convertSet)}
 
-  ${genExport(exportString)}
+  ${genExport(exportString, propertySet, convertSet)}
 }
 
     ''';
     }
   }
 
-  String genSupperClass(String genClass, String genMixin) {
+  /// genSupperClass
+  String genSupperClass(String genClass, String genMixin,
+      Set<PropertyInfo> propertySet, Set<ConvertInfo> convertSet) {
     if (genClass.isNotEmpty) {
       return '''
       class $genClass extends $superClass with $genMixin {
@@ -187,7 +194,9 @@ $customCode
     return '';
   }
 
-  String genExport(String exportString) {
+  /// genExport
+  String genExport(String exportString, Set<PropertyInfo> propertySet,
+      Set<ConvertInfo> convertSet) {
     if (exportString.isNotEmpty) {
       return '''
       @override
@@ -201,7 +210,9 @@ $customCode
     return '';
   }
 
-  String genTypes(String typesString) {
+  /// genTypes
+  String genTypes(String typesString, Set<PropertyInfo> propertySet,
+      Set<ConvertInfo> convertSet) {
     if (typesString.isNotEmpty) {
       return '''
       @override
@@ -215,7 +226,9 @@ $customCode
     return '';
   }
 
-  String genValidate(String validateString) {
+  /// genValidate
+  String genValidate(String validateString, Set<PropertyInfo> propertySet,
+      Set<ConvertInfo> convertSet) {
     if (validateString.isNotEmpty) {
       return '''
       @override
@@ -228,7 +241,9 @@ $customCode
     return '';
   }
 
-  String genDefault(String initCode, String initString) {
+  /// genDefault
+  String genDefault(String initCode, String initString,
+      Set<PropertyInfo> propertySet, Set<ConvertInfo> convertSet) {
     if (initCode.isNotEmpty || initString.isNotEmpty) {
       return '''
       @override
@@ -242,6 +257,7 @@ $customCode
   }
 }
 
+/// defaultConvert
 Map<String, String> defaultConvert = {
   'int': 'defaultIntConvert',
   'double': 'defaultDoubleConvert',

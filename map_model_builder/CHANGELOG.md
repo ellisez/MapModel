@@ -53,3 +53,6 @@
 
 ## 1.0.19
 - Support annotation resolve for subclass.
+
+## 1.0.20
+- fix bug genExport().
