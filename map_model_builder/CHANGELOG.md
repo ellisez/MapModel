@@ -50,3 +50,6 @@
 
 ## 1.0.18
 - fix bug convert type *.
+
+## 1.0.19
+- Support annotation resolve for subclass.

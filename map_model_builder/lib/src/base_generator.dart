@@ -4,6 +4,8 @@ import 'package:analyzer/dart/element/type.dart';
 import 'package:build/src/builder/build_step.dart';
 import 'package:source_gen/source_gen.dart';
 
+import 'resolve_info.dart';
+
 abstract class BaseGenerator<T> extends GeneratorForAnnotation<T> {
   String get mapClass => 'Map<String, dynamic>';
 
@@ -14,6 +16,10 @@ abstract class BaseGenerator<T> extends GeneratorForAnnotation<T> {
   String get initCode => '';
 
   String get modelRef => '\$data';
+
+  Set<PropertyInfo> propertySet = {};
+
+  Set<ConvertInfo> convertSet = {};
 
   @override
   generateForAnnotatedElement(
@@ -42,7 +48,13 @@ abstract class BaseGenerator<T> extends GeneratorForAnnotation<T> {
           if (propertyTypeObject.nullabilitySuffix != NullabilitySuffix.none) {
             typeElement = typeElement.substring(0, typeElement.length - 1);
           }
-          converts[typeElement] = value!.toStringValue()!;
+          var convertName = value!.toStringValue()!;
+          converts[typeElement] = convertName;
+
+          convertSet.add(ConvertInfo(
+              type: propertyTypeObject,
+              convert: convertName,
+              typeName: typeElement));
         }
       }
 
@@ -67,8 +79,13 @@ abstract class BaseGenerator<T> extends GeneratorForAnnotation<T> {
           }
 
           /// property name
-          var propertyName = item.getField('name')!.toStringValue();
+          var propertyName = item.getField('name')!.toStringValue()!;
           var propertyValue = "$modelRef['$propertyName']";
+
+          propertySet.add(PropertyInfo(
+              propertyName: propertyName,
+              propertyType: propertyTypeObject,
+              propertyTypeName: propertyType));
 
           /// property default
           var defaultValue = item.getField('value');
@@ -129,11 +146,11 @@ abstract class BaseGenerator<T> extends GeneratorForAnnotation<T> {
           }
 
           propertyString += '''
-  $propertyType get $propertyName => $setValue;
-
-  set $propertyName($propertyType $propertyName) => $propertyValue = $propertyName;
-
-''';
+            $propertyType get $propertyName => $setValue;
+          
+            set $propertyName($propertyType $propertyName) => $propertyValue = $propertyName;
+          
+          ''';
           exportString += "map['$propertyName'] = $propertyValue;";
         }
       }
