@@ -24,3 +24,6 @@
 
 ## 1.0.9
 - Update comments.
+
+## 1.0.10
+- MapBinding can create.

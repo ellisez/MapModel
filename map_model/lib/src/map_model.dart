@@ -1,6 +1,6 @@
 import 'package:meta/meta.dart';
 
-abstract class MapModel {
+class MapModel {
   /// do not use it out of subclass
   @protected
   // ignore: non_constant_identifier_names

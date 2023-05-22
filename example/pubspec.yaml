@@ -6,7 +6,7 @@ environment:
   sdk: ^3.0.0
 
 dependencies:
-  map_model: ^1.0.9
+  map_model: ^1.0.10
 
 dev_dependencies:
   build_runner: ^2.4.4
