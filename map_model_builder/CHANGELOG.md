@@ -56,3 +56,6 @@
 
 ## 1.0.20
 - fix bug genExport().
+
+## 1.0.21
+- MapModel can create.
