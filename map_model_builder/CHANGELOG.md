@@ -59,3 +59,6 @@
 
 ## 1.0.21
 - MapModel can create.
+
+## 1.0.22
+- Support customConvert().

@@ -1,5 +1,4 @@
 import 'package:analyzer/dart/element/element.dart';
-import 'package:analyzer/dart/element/nullability_suffix.dart';
 import 'package:analyzer/dart/element/type.dart';
 import 'package:build/src/builder/build_step.dart';
 import 'package:source_gen/source_gen.dart';
@@ -22,6 +21,8 @@ abstract class BaseGenerator<T> extends GeneratorForAnnotation<T> {
 
   /// modelRef
   String get modelRef => '\$data';
+
+  String? customConvert(PropertyInfo propertyInfo) => null;
 
   @override
   generateForAnnotatedElement(
@@ -49,17 +50,15 @@ abstract class BaseGenerator<T> extends GeneratorForAnnotation<T> {
           var value = entry.value;
 
           var propertyTypeObject = key!.toTypeValue()!;
-          var typeElement = propertyTypeObject.toString();
-          if (propertyTypeObject.nullabilitySuffix != NullabilitySuffix.none) {
-            typeElement = typeElement.substring(0, typeElement.length - 1);
-          }
+          var typeElement =
+              propertyTypeObject.getDisplayString(withNullability: false);
           var convertName = value!.toStringValue()!;
           converts[typeElement] = convertName;
 
           convertSet.add(ConvertInfo(
-              type: propertyTypeObject,
-              convert: convertName,
-              typeName: typeElement));
+            type: propertyTypeObject,
+            convert: convertName,
+          ));
         }
       }
 
@@ -79,7 +78,8 @@ abstract class BaseGenerator<T> extends GeneratorForAnnotation<T> {
           if (itemType is ParameterizedType) {
             if (itemType.typeArguments.isNotEmpty) {
               propertyTypeObject = itemType.typeArguments.first;
-              propertyType = propertyTypeObject.toString();
+              propertyType =
+                  propertyTypeObject.getDisplayString(withNullability: true);
             }
           }
 
@@ -87,10 +87,11 @@ abstract class BaseGenerator<T> extends GeneratorForAnnotation<T> {
           var propertyName = item.getField('name')!.toStringValue()!;
           var propertyValue = "$modelRef['$propertyName']";
 
-          propertySet.add(PropertyInfo(
-              propertyName: propertyName,
-              propertyType: propertyTypeObject,
-              propertyTypeName: propertyType));
+          var propertyInfo = PropertyInfo(
+            propertyName: propertyName,
+            propertyType: propertyTypeObject,
+          );
+          propertySet.add(propertyInfo);
 
           /// property default
           var defaultValue = item.getField('value');
@@ -108,7 +109,9 @@ abstract class BaseGenerator<T> extends GeneratorForAnnotation<T> {
             propertyTypeObject as ParameterizedType;
             var listEleType = propertyTypeObject.typeArguments.first;
             if (listEleType is! DynamicType) {
-              setValue = '$setValue?.cast<$listEleType>()';
+              setValue = '''
+              $setValue?.runtimeType.toString() == 'CastList<dynamic, $listEleType>'? $setValue: $setValue?.cast<$listEleType>()
+              ''';
             }
           } else if (propertyTypeObject.isDartCoreMap) {
             /// castMap
@@ -116,14 +119,14 @@ abstract class BaseGenerator<T> extends GeneratorForAnnotation<T> {
             var keyType = propertyTypeObject.typeArguments.first;
             var valueType = propertyTypeObject.typeArguments.last;
             if (keyType is! DynamicType || valueType is! DynamicType) {
-              setValue = '$setValue?.cast<$keyType, $valueType>()';
+              setValue = '''
+              $setValue?.runtimeType.toString() == 'CastMap<dynamic, dynamic, $keyType, $valueType>'? $setValue: $setValue?.cast<$keyType, $valueType>()
+              ''';
             }
           }
 
-          var typeElement = propertyType;
-          if (propertyTypeObject.nullabilitySuffix != NullabilitySuffix.none) {
-            typeElement = typeElement.substring(0, typeElement.length - 1);
-          }
+          var typeElement =
+              propertyTypeObject.getDisplayString(withNullability: false);
 
           /// types
           typesString += '''
@@ -132,22 +135,23 @@ abstract class BaseGenerator<T> extends GeneratorForAnnotation<T> {
 
           /// validate
           if (propertyTypeObject is! DynamicType) {
-            var convert = converts[typeElement] ?? defaultConvert[typeElement];
+            var convertCode = "assert($propertyName is $propertyType, '$propertyName is not $propertyType');";
+
+            var convert = converts[typeElement] ??
+                defaultConvert(typeElement, propertyInfo);
             if (convert != null) {
-              validateString += '''
-              var $propertyName = $propertyValue;
-              if ($propertyName != null) {
-                $propertyValue = $convert('$propertyName', $propertyName);
-              }
-              ''';
+              convertCode = "$propertyValue = $convert('$propertyName', $propertyName);";
             } else {
-              validateString += '''
+              var str = customConvert(propertyInfo);
+              if (str != null) convertCode = '$propertyValue = $str;';
+            }
+
+            validateString += '''
               var $propertyName = $propertyValue;
               if ($propertyName != null) {
-                assert($propertyName is $propertyType, '$propertyName is not $propertyType');
+                $convertCode
               }
               ''';
-            }
           }
 
           propertyString += '''
@@ -255,13 +259,21 @@ $customCode
     }
     return '';
   }
-}
 
-/// defaultConvert
-Map<String, String> defaultConvert = {
-  'int': 'defaultIntConvert',
-  'double': 'defaultDoubleConvert',
-  'String': 'defaultStringConvert',
-  'List<String>': 'stringListConvertBuilder()',
-  'DateTime': 'dateTimeConvertBuilder()',
-};
+  /// defaultConvert
+  String? defaultConvert(String typeElement, PropertyInfo propertyInfo) {
+    switch (typeElement) {
+      case 'int':
+        return 'defaultIntConvert';
+      case 'double':
+        return 'defaultDoubleConvert';
+      case 'String':
+        return 'defaultStringConvert';
+      case 'List<String>':
+        return 'stringListConvertBuilder()';
+      case 'DateTime':
+        return 'dateTimeConvertBuilder()';
+    }
+    return null;
+  }
+}

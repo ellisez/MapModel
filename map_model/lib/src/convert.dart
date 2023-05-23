@@ -33,11 +33,20 @@ DateTime Function(String, dynamic) dateTimeConvertBuilder() {
     } else if (value is int) {
       return DateTime.fromMicrosecondsSinceEpoch(value);
     }
-    throw AssertionError('$property <${value.runtimeType}> can not convert DateTime');
+    throw AssertionError(
+        '$property <${value.runtimeType}> can not convert DateTime');
   };
 }
 
 /// stringListConvertBuilder
 List<String> Function(String, dynamic) stringListConvertBuilder(
         [String sep = ' ']) =>
-    (_, dynamic value) => value.split(sep);
+    (property, dynamic value) {
+      if (value is String) {
+        return value.split(sep);
+      } else if (value is List) {
+        return value.cast<String>();
+      }
+      throw AssertionError(
+          '$property <${value.runtimeType}> can not convert DateTime');
+    };

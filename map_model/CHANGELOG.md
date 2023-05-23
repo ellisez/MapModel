@@ -27,3 +27,6 @@
 
 ## 1.0.10
 - MapBinding can create.
+
+## 1.0.11
+- Support customConvert.
